@@ -17,7 +17,7 @@ Note that we don't combine the main with ray_trainer as ray_trainer is used by o
 
 from verl import DataProto
 import torch
-from verl.utils.reward_score import gsm8k, math
+from verl.utils.reward_score import gsm8k, math, rarearena
 from verl.trainer.ppo.ray_trainer import RayPPOTrainer
 
 
@@ -26,6 +26,8 @@ def _default_compute_score(data_source, solution_str, ground_truth):
         return gsm8k.compute_score(solution_str, ground_truth)
     elif data_source in ['lighteval/MATH', 'DigitalLearningGmbH/MATH-lighteval']:
         return math.compute_score(solution_str, ground_truth)
+    if data_source == 'rare_arena':
+        return rarearena.compute_score(solution_str, ground_truth)
     else:
         raise NotImplementedError
 
