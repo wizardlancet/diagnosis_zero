@@ -3,7 +3,7 @@ import random
 from difflib import SequenceMatcher
 from collections import Counter
 
-# TODO: use a similarity
+
 def extract_solution(solution_str, method='strict'):
     """
     Extract content wrapped by <answer></answer> from solution_str,
@@ -41,31 +41,32 @@ def extract_solution(solution_str, method='strict'):
 
 def calculate_similarity(prediction, true_labels):
     """
-    计算预测诊断与正确诊断的相似度
+    Calculate the similarity between the predicted diagnosis and the correct diagnosis.
+    Although it is not perfect, this function provides a rough estimate of the similarity.
     
     Args:
-        prediction: 预测的诊断结果（字符串）
-        true_labels: 正确的诊断列表（字符串列表）
+        prediction: The predicted diagnosis (string)
+        true_labels: List of correct diagnoses (list of strings)
     
     Returns:
-        float: 0-1之间的相似度分数
+        float: Similarity score between 0 and 1
     """
-    # 标准化处理
+    # Standardize the input
     prediction = prediction.lower().strip()
     true_labels = [label.lower().strip() for label in true_labels]
     
-    # 完全匹配检查
+    # Check for exact match
     if prediction in true_labels:
         return 1.0
     
-    # 计算与每个正确标签的相似度，取最大值
+    # Calculate similarity with each correct label and take the maximum value
     max_similarity = 0.0
     
     for true_label in true_labels:
-        # 1. 计算序列相似度 (0.3权重)
+        # 1. Calculate sequence similarity
         sequence_sim = SequenceMatcher(None, prediction, true_label).ratio()
         
-        # 2. 计算词集合相似度 (0.4权重)
+        # 2. Calculate word set similarity
         pred_words = set(re.findall(r'\w+', prediction))
         true_words = set(re.findall(r'\w+', true_label))
         
@@ -76,7 +77,7 @@ def calculate_similarity(prediction, true_labels):
             union = len(pred_words | true_words)
             word_sim = intersection / union
         
-        # 3. 计算词频相似度 (0.3权重)
+        # 3. Calculate word frequency similarity
         pred_word_freq = Counter(re.findall(r'\w+', prediction))
         true_word_freq = Counter(re.findall(r'\w+', true_label))
         
@@ -88,8 +89,8 @@ def calculate_similarity(prediction, true_labels):
             max_freq_sum = sum(max(pred_word_freq.get(word, 0), true_word_freq.get(word, 0)) for word in all_words)
             freq_sim = 1 - (freq_diff_sum / (2 * max_freq_sum)) if max_freq_sum > 0 else 0
         
-        # 综合评分
-        similarity = 0.8 * sequence_sim + 0.1 * word_sim + 0.1 * freq_sim
+        # Combine scores
+        similarity = 0.8 * sequence_sim + 0.2 * word_sim # empirical weights for preliminary testing
         max_similarity = max(max_similarity, similarity)
     
     return max_similarity
@@ -112,7 +113,7 @@ def compute_score(solution_str, ground_truth, method='strict', format_score=0.1,
         
     extracted_answer = extract_solution(solution_str=solution_str, method=method)
     
-    do_print = random.randint(1, 64) == 1
+    do_print = random.randint(1, 128) == 1
     
     if do_print:
         print(f"--------------------------------")
@@ -132,25 +133,12 @@ def compute_score(solution_str, ground_truth, method='strict', format_score=0.1,
     # Calculate similarity score
     max_similarity = calculate_similarity(extracted_answer, diagnosis_list_lower)
     
-    # If similarity is very high (>0.9), give full score
+    # If similarity is very high (>0.8), give full score, empirical threshold
     if max_similarity > 0.8:
         return score
     
     return format_score
 
-    #     # If similarity is very low (<0.2), give 0
-    # if max_similarity < 0.2:
-    #     return format_score
-    
-    # # Otherwise, give partial score based on similarity
-    # # Scale the similarity score between format_score and score
-    # partial_score = format_score + (score - format_score) * max_similarity
-    
-    # if do_print:
-    #     print(f"Similarity score: {max_similarity}")
-    #     print(f"Final score: {partial_score}")
-    
-    # return partial_score
     
     
     
