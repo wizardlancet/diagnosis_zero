@@ -30,7 +30,7 @@ This project explores the reproduction of DeepSeek R1 Zero training based on Ver
 
 
 ## 📈 Performance
-Different from rule based reward function, evaluation of diagnsosi synonyms match is conducted using LLM-as-Judge following the origin rare arena dataset using GPT-4o.
+Different from the rule-based reward function, the evaluation of diagnosis synonyms match is conducted using LLM-as-Judge, following the original Rare-Arena dataset with GPT-4o.
 
 | Model | Step 0  | Step 500  | Step 1000 | Step 1500 |           |
 |-------|---------|-----------|-----------|-----------| --------- |
